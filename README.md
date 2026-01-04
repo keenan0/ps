@@ -1,2 +1,1 @@
-# ps
-signal processing repo
+# Signal Processing Labs

@@ -1,34 +1,27 @@
 import numpy as np
+from scipy.io import wavfile
 
-def sine(
-        amplitude = 1.0,
-        frequency = 440,
-        phase = 0,
-        sampling_freq = 44100,
-        duration = 1.0
-        ):
-    
+def sine(amplitude = 1.0, frequency = 440, phase = 0, sampling_freq = 44100, duration = 1.0):
+
     t = np.linspace(0, duration, int(sampling_freq * duration), endpoint=False)
     signal = amplitude * np.sin(2 * np.pi * frequency * t + phase)
 
     return t, signal
 
+def save_audio(file_name, signal, sample_rate=44100):
+    """
+    Saves an array of samples as a .wav file. \n
+    .wav should be included in the file_name by the user. \n 
+    Handles conversion from float to int16.
+    """
 
-from scipy.io import wavfile
-def salveaza_audio(nume_fisier, vector_semnal, sample_rate=44100):
-    """
-    Salvează un vector de sample-uri într-un fișier .wav.
-    Asigură conversia corectă de la float la int16 pentru compatibilitate.
-    """
-    # 1. Normalizare (Opțional, dar recomandat)
-    # Ne asigurăm că cel mai mare vârf este la 1.0, să nu avem distorsiuni
-    if np.max(np.abs(vector_semnal)) > 0:
-        vector_semnal = vector_semnal / np.max(np.abs(vector_semnal))
+    # Normalize the input: prevents overflow of 16 bits when multiplying by 2^15. 
+    # i.e. consider a signal with amp = 10 => 10 * 2 ^ 15 overflows to 0 -> 0101[0000000000000000]
+    if np.max(np.abs(signal)) > 0:
+        signal = signal / np.max(np.abs(signal))
     
-    # 2. Conversie la 16-bit PCM (formatul standard pentru .wav)
-    # Fișierele .wav standard așteaptă valori între -32768 și 32767
-    semnal_int16 = (vector_semnal * 32767).astype(np.int16)
+    # Convert to int16 for wav file
+    semnal_int16 = (signal * 32767).astype(np.int16)
     
-    # 3. Scrierea efectivă
-    wavfile.write(nume_fisier, sample_rate, semnal_int16)
-    print(f"Fișierul '{nume_fisier}' a fost salvat cu succes!")
+    wavfile.write(file_name, sample_rate, semnal_int16)
+    print(f"File '{file_name}' saved.")
